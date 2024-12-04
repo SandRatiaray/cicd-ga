@@ -2,11 +2,12 @@ name: CI/CD Server Workflow
 
 env:
   SERVER_IP: '54.37.71.166'
-  SERVER_USER: ubuntu
+  SERVER_USER: 'root'
 
 on:
   push:
-    branches: main
+    branches:
+      - main
 
 jobs:
   CI:
@@ -17,17 +18,22 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+
       - name: Install nodejs
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
+
       - name: install dependencies
         run: npm ci .npm --prefer-offline
+
       - name: check linting code
         run: npm run lint
+
       #   - name: check dependencies vulnerability
       #     run: npm audit
+
       - name: test execution
         run: npm run test:ci
 
@@ -38,17 +44,30 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: initialize SSh
-        # scp = SSH protocol for exchanging folder server to server
+      #   - name: initialize SSH
+      #     # scp = SSH protocol for exchanging folder server to server
+      #     run: |
+      #       eval $(ssh-agent -s)
+      #       ssh-add - <<< "${{ secrets.SSH_KEY_VPS }}"
+      #       mkdir -p ~/.ssh
+      #       ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      #       ssh -T ${{env.SERVER_USER}}@${{env.SERVER_IP}}
+
+      #   - name: deploy code
+      #     run: |
+      #       scp -r ./server ${{env.SERVER_USER}}@${{env.SERVER_IP}}:/var/www
+      #       ssh ${{env.SERVER_USER}}@${{env.SERVER_IP}} "cd /var/www/server && npm install --omit=dev"
+      #       ssh ${{env.SERVER_USER}}@${{env.SERVER_IP}} "cd /var/www/server && pm2 startOrRestart ecosystem.config.js --env production && pm2 save"
+      - name: prépare SSH
         run: |
           eval $(ssh-agent -s)
           ssh-add - <<< "${{ secrets.SSH_KEY_VPS }}"
           mkdir -p ~/.ssh
-          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-          ssh -T ${{env.SERVER_USER}}@${{env.SERVER_IP}}
+          ssh-keyscan -H ${{ env.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh -T ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}
 
-      - name: deploy code
+      - name: déploie le code
         run: |
-          scp -r ./server ${{env.SERVER_USER}}@${{env.SERVER_IP}}:/var/www
-          ssh ${{env.SERVER_USER}}@${{env.SERVER_IP}} "cd /var/www/server && npm install --omit=dev"
-          ssh ${{env.SERVER_USER}}@${{env.SERVER_IP}} "cd /var/www/server && pm2 startOrRestart ecosystem.config.js --env production && pm2 save"
+          scp -r ./server ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:/var/www
+          ssh ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} "cd /var/www/server && npm install --omit=dev"
+          ssh ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} "cd /var/www/server && pm2 startOrRestart ecosystem.config.js --env production && pm2 save"
