@@ -2,7 +2,7 @@ name: CI/CD Server Workflow
 
 env:
   SERVER_IP: '54.37.71.166'
-  SERVER_USER: root
+  SERVER_USER: ubuntu
 
 on:
   push:
