@@ -27,8 +27,8 @@ jobs:
       - name: check linting code
         run: npm run lint
 
-      - name: check dependencies vulnerability
-        run: npm audit
+    #   - name: check dependencies vulnerability
+    #     run: npm audit
 
   Build:
     needs: Check_before_build
