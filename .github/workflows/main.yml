@@ -1,4 +1,4 @@
-name: CI/CD Server Workflow
+name: CI Server Workflow
 
 env:
   SERVER_IP: '54.37.71.166'
@@ -36,7 +36,7 @@ jobs:
 
       - name: test execution
         run: npm run test:ci
-        
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
