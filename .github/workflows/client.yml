@@ -1,0 +1,53 @@
+name: CI/CD Frontend Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Check_before_build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Install nodejs
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: install dependencies
+        run: npm ci .npm --prefer-offline
+
+      - name: check linting code
+        run: npm run lint
+
+      - name: check dependencies vulnerability
+        run: npm audit
+
+  Build:
+    needs: Check_before_build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Install nodejs
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: install dependencies
+        run: npm ci .npm --prefer-offline
+
+      - name: build frontend application
+        run: npm run build
